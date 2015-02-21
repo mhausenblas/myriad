@@ -12,7 +12,8 @@ The name _Myriad_ means, _countless or extremely great number_. In context of th
 
 * [How Myriad works](docs/how-it-works.md)
 * [Developing Myriad](docs/myriad-dev.md)
-* [Local vagrant setup guide](docs/vagrant.md)
+* [Local Vagrant setup guide](docs/vagrant.md)
+* [EC2 setup guide](docs/ec2.md)
 * [Myriad REST API](docs/API.md)
 * [Auto-scaling YARN cluster](docs/control-plane-algorithm.md)
 * [Mesos, YARN and cgroups](docs/cgroups.md)
