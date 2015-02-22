@@ -9,7 +9,7 @@ You can use the following guide to set up Myriad on AWS [EC2](http://aws.amazon.
 
 ### Prerequisites
 
-In order to perform the cluster EC2 provisioning you'll need:
+In order to perform the single instance EC2 provisioning you'll need:
 
 * An [AWS account](http://aws.amazon.com/account/)
 * An [EC2 key pair](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
