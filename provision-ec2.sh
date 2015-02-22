@@ -2,11 +2,12 @@
 
 ###############################################################################
 #  
-# Installs Myriad on EC2
+# Installs Mesos 0.21.1, Hadoop 2.5.0 incl. YARN and Myriad on EC2 instance
+# with Ubuntu trusty 64, 14.04 LTS.
 #
 # Usage:
 #
-#    ./provision-ec2.sh [AMI_ID]
+#    ./provision-ec2.sh
 #
 # Example
 #
@@ -29,10 +30,6 @@
 
 PREFIX="Myriad EC2 provisioner:"
 MESOS_VERSION="0.21.1"
-
-# if no CLI parameter is provided by user, use an AMI as follows:
-# Ubuntu trusty 64, 14.04 LTS, instance-store in eu-west-1
-EC2_ZONE=${1:-"ami-0de9627a"} 
 
 set -e
 

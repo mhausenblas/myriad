@@ -16,13 +16,111 @@ In order to perform the cluster EC2 provisioning you'll need:
 * To have the [AWS CLI](http://docs.aws.amazon.com/cli/latest/userguide/installing.html) installed
 
 Before you start, you need to make sure that the environment variables `AWS_ACCESS_KEY_ID`
-and `AWS_SECRET_ACCESS_KEY` are set properly (see also `Account` > `Security Credentials` > `Access Credentials` on AWS).
+and `AWS_SECRET_ACCESS_KEY` are set properly (see also `Account` > `Security Credentials` > `Access Credentials` on AWS). If you have `aws` CLI fresh installed, it will ask you this. Also, create and note down the name for a key pair, referred to as `$KEYPAIRNAME`, below.
 
 ```shell
-$ ssh ...
-$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/provision-ec2.sh
-$ ./provision-ec2.sh
+$ aws ec2 create-security-group --group-name myriad-mesos --description "Myriad/Mesos security group"
+$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 22 --cidr 0.0.0.0/0
+$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 8080 --cidr 0.0.0.0/0
+$ aws ec2 run-instances --image-id ami-0de9627a --count 1 --instance-type m3.2xlarge --key-name $KEYPAIRNAME --security-groups myriad-mesos
+...
+Now check if the instance is running in the AWS/EC2 console in your Web browser and note down the public FQDN, something like ec2-XXX-XXX-XXX-XXX.region.compute.amazonaws.com
+...
+$ ssh -i ~/.ssh/$KEYFILENAME ubuntu@ec2-XXX-XXX-XXX-XXX.region.compute.amazonaws.com
 ```
+
+After the last step above you should be in your Ubuntu trusty 64, 14.04 LTS EC2 instance and can then do the following:
+
+```shell
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ pwd
+/home/ubuntu
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/provision-ec2.sh
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ chmod 755 provision-ec2.sh
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ ./provision-ec2.sh
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/setup-yarn-1.sh
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ chmod 755 setup-yarn-1.sh
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ ./setup-yarn-1.sh
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo su - hduser
+hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/setup-yarn-2.sh
+hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ chmod 755 setup-yarn-2.sh
+hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ ./setup-yarn-2.sh
+hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ exit
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo apt-get install git
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ git clone https://github.com/mesos/myriad.git
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ cd myriad
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ ./gradlew build
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo cp build/libs/* /usr/local/hadoop/share/hadoop/yarn/lib/
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ ./gradlew capsuleExecutor
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ mkdir -p /usr/local/libexec/mesos/
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo cp build/libs/myriad-executor-* /usr/local/libexec/mesos/
+```
+
+Next, we configure YARN to use Myriad. Paste the following into `/usr/local/hadoop/etc/hadoop/yarn-site.xml` after the section `<!-- Site specific YARN configuration properties -->`:
+
+```xml
+<property>
+    <name>yarn.nodemanager.resource.cpu-vcores</name>
+    <value>${nodemanager.resource.cpu-vcores}</value>
+</property>
+<property>
+    <name>yarn.nodemanager.resource.memory-mb</name>
+    <value>${nodemanager.resource.memory-mb}</value>
+</property>
+
+<!-- Configure Myriad Scheduler here -->
+<property>
+    <name>yarn.resourcemanager.scheduler.class</name>
+    <value>com.ebay.myriad.scheduler.yarn.MyriadFairScheduler</value>
+    <description>One can configure other scehdulers as well from following list: com.ebay.myriad.scheduler.yarn.MyriadCapacityScheduler, com.ebay.myriad.scheduler.yarn.MyriadFifoScheduler</description>
+</property>
+```
+
+To configure Myriad itself, paste the following into a new file called `/usr/local/hadoop/etc/hadoop/myriad-default-config.yml`:
+
+```yml
+mesosMaster: 10.0.2.15:5050
+checkpoint: false
+frameworkFailoverTimeout: 43200000
+frameworkName: MyriadAlpha
+nativeLibrary: /usr/local/lib/libmesos.so
+zkServers: localhost:2181
+zkTimeout: 20000
+profiles:
+  small:
+    cpu: 1
+    mem: 1100
+  medium:
+    cpu: 2
+    mem: 2048
+  large:
+    cpu: 4
+    mem: 4096
+rebalancer: true
+nodemanager:
+  jvmMaxMemoryMB: 1024
+  user: hduser
+  cpus: 0.2
+  cgroups: false
+executor:
+  jvmMaxMemoryMB: 256
+  path: file://localhost/usr/local/libexec/mesos/myriad-executor-0.0.1.jar
+```
+
+Finally, to launch Myriad, run the following:
+
+```shell
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo su hduser
+hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ yarn-daemon.sh start resourcemanager
+```
+
+Check the master:
+
+```shell
+hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ mesos ps --master=127.0.0.1:5050
+```
+
+
+
 
 ### Provisioning on EC2
 
