@@ -38,10 +38,44 @@ set -e
 
 echo "${PREFIX} starting installation ..."
 
+# For installing Java 8
+add-apt-repository ppa:webupd8team/java
+
+# For Mesos
+apt-key adv --keyserver keyserver.ubuntu.com --recv E56151BF
+DISTRO=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+CODENAME=$(lsb_release -cs)
+echo "deb http://repos.mesosphere.io/${DISTRO} ${CODENAME} main" | sudo tee /etc/apt/sources.list.d/mesosphere.list
+
+apt-get -y update
+echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections
+apt-get -y install oracle-java8-installer
+apt-get -y install oracle-java8-set-default
+apt-get -y install libcurl3
+apt-get -y install zookeeperd
+apt-get -y install aria2
+
+echo "${PREFIX} installing Mesos version: ${MESOS_VERSION}..."
+apt-get -y install mesos
+echo "Done"
+
+ln -s /usr/lib/jvm/java-8-oracle/jre/lib/amd64/server/libjvm.so /usr/lib/libjvm.so
+
+echo "${PREFIX} starting Mesos master"
+start mesos-master
+
+echo "${PREFIX} starting Mesos slave"
+start mesos-slave
+
+echo "${PREFIX} successfully provisioned EC2 instance with Mesos"
+
 # setup-yarn-{1|2}.sh
 
-# install Gradle
+echo "${PREFIX} now setting up YARN"
 
-# ./gradlew build
+# install Gradle and ./gradlew build
+ 
+echo "${PREFIX} now building Myriad"
+
 
 echo "${PREFIX} successfully provisioned Myriad"
