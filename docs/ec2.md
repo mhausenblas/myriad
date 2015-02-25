@@ -21,6 +21,8 @@ and `AWS_SECRET_ACCESS_KEY` are set properly (see also `Account` > `Security Cre
 ```shell
 $ aws ec2 create-security-group --group-name myriad-mesos --description "Myriad/Mesos security group"
 $ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 22 --cidr 0.0.0.0/0
+$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 8088 --cidr 0.0.0.0/0
+$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 5050 --cidr 0.0.0.0/0
 $ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 8080 --cidr 0.0.0.0/0
 $ aws ec2 run-instances --image-id ami-0de9627a --count 1 --instance-type m3.2xlarge --key-name $KEYPAIRNAME --security-groups myriad-mesos
 ...
@@ -71,9 +73,12 @@ Next, we configure YARN to use Myriad. Paste the following into `/usr/local/hado
 <property>
     <name>yarn.resourcemanager.scheduler.class</name>
     <value>com.ebay.myriad.scheduler.yarn.MyriadFairScheduler</value>
-    <description>One can configure other scehdulers as well from following list: com.ebay.myriad.scheduler.yarn.MyriadCapacityScheduler, com.ebay.myriad.scheduler.yarn.MyriadFifoScheduler</description>
+    <description>One can configure other schedulers as well from following list: com.ebay.myriad.scheduler.yarn.MyriadCapacityScheduler, com.ebay.myriad.scheduler.yarn.MyriadFifoScheduler</description>
 </property>
 ```
+
+Note that I've been doing the deployment on an [m3.2xlarge](http://aws.amazon.com/ec2/instance-types/) instance with 8 vCPU and 30 GiB main memory.
+
 
 To configure Myriad itself, paste the following into a new file called `/usr/local/hadoop/etc/hadoop/myriad-default-config.yml`:
 
@@ -110,7 +115,7 @@ Finally, to launch Myriad, run the following:
 
 ```shell
 ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo su hduser
-hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ yarn-daemon.sh start resourcemanager
+hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ yarn resourcemanager start 
 ```
 
 Check the master:
