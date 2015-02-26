@@ -21,9 +21,12 @@ and `AWS_SECRET_ACCESS_KEY` are set properly (see also `Account` > `Security Cre
 ```shell
 $ aws ec2 create-security-group --group-name myriad-mesos --description "Myriad/Mesos security group"
 $ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 22 --cidr 0.0.0.0/0
-$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 8088 --cidr 0.0.0.0/0
+$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 5005 --cidr 0.0.0.0/0
 $ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 5050 --cidr 0.0.0.0/0
+$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 5051 --cidr 0.0.0.0/0
+$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 8088 --cidr 0.0.0.0/0
 $ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 8080 --cidr 0.0.0.0/0
+$ aws ec2 authorize-security-group-ingress --group-name myriad-mesos --protocol tcp --port 8081 --cidr 0.0.0.0/0
 $ aws ec2 run-instances --image-id ami-0de9627a --count 1 --instance-type m3.2xlarge --key-name $KEYPAIRNAME --security-groups myriad-mesos
 ...
 Now check if the instance is running in the AWS/EC2 console in your Web browser and note down the public FQDN, something like ec2-XXX-XXX-XXX-XXX.region.compute.amazonaws.com
@@ -62,11 +65,11 @@ Next, we configure YARN to use Myriad. Paste the following into `/usr/local/hado
 ```xml
 <property>
     <name>yarn.nodemanager.resource.cpu-vcores</name>
-    <value>${nodemanager.resource.cpu-vcores}</value>
+    <value>2</value>
 </property>
 <property>
     <name>yarn.nodemanager.resource.memory-mb</name>
-    <value>${nodemanager.resource.memory-mb}</value>
+    <value>2000</value>
 </property>
 
 <!-- Configure Myriad Scheduler here -->
@@ -114,17 +117,15 @@ executor:
 Finally, to launch Myriad, run the following:
 
 ```shell
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo su hduser
+ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ su hduser
 hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ yarn resourcemanager start 
 ```
 
-Check the master:
+Check the Mesos cluster:
 
 ```shell
-hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ mesos ps --master=127.0.0.1:5050
+hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ mesos state
 ```
-
-
 
 
 ### Provisioning on EC2
