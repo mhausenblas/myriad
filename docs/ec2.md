@@ -37,27 +37,27 @@ $ ssh -i ~/.ssh/$KEYFILENAME ubuntu@ec2-XXX-XXX-XXX-XXX.region.compute.amazonaws
 After the last step above you should be in your Ubuntu trusty 64, 14.04 LTS EC2 instance and can then do the following:
 
 ```shell
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ pwd
+ubuntu@XXX.XXX.XXX.XXX:~$ pwd
 /home/ubuntu
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/provision-ec2.sh
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ chmod 755 provision-ec2.sh
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ ./provision-ec2.sh
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/setup-yarn-1.sh
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ chmod 755 setup-yarn-1.sh
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ ./setup-yarn-1.sh
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo su - hduser
-hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/setup-yarn-2.sh
-hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ chmod 755 setup-yarn-2.sh
-hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ ./setup-yarn-2.sh
-hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ exit
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo apt-get install git
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ git clone https://github.com/mesos/myriad.git
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ cd myriad
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ ./gradlew build
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo cp build/libs/* /usr/local/hadoop/share/hadoop/yarn/lib/
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ ./gradlew capsuleExecutor
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ mkdir -p /usr/local/libexec/mesos/
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ sudo cp build/libs/myriad-executor-* /usr/local/libexec/mesos/
+ubuntu@XXX.XXX.XXX.XXX:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/provision-ec2.sh
+ubuntu@XXX.XXX.XXX.XXX:~$ chmod 755 provision-ec2.sh
+ubuntu@XXX.XXX.XXX.XXX:~$ ./provision-ec2.sh
+ubuntu@XXX.XXX.XXX.XXX:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/setup-yarn-1.sh
+ubuntu@XXX.XXX.XXX.XXX:~$ chmod 755 setup-yarn-1.sh
+ubuntu@XXX.XXX.XXX.XXX:~$ ./setup-yarn-1.sh
+ubuntu@XXX.XXX.XXX.XXX:~$ sudo su - hduser
+hduser@XXX.XXX.XXX.XXX:~$ wget https://raw.githubusercontent.com/mhausenblas/myriad/phase1/setup-yarn-2.sh
+hduser@XXX.XXX.XXX.XXX:~$ chmod 755 setup-yarn-2.sh
+hduser@XXX.XXX.XXX.XXX:~$ ./setup-yarn-2.sh
+hduser@XXX.XXX.XXX.XXX:~$ exit
+ubuntu@XXX.XXX.XXX.XXX:~$ sudo apt-get install git
+ubuntu@XXX.XXX.XXX.XXX:~$ git clone https://github.com/mesos/myriad.git
+ubuntu@XXX.XXX.XXX.XXX:~$ cd myriad
+ubuntu@XXX.XXX.XXX.XXX:~$ ./gradlew build
+ubuntu@XXX.XXX.XXX.XXX:~$ sudo cp build/libs/* /usr/local/hadoop/share/hadoop/yarn/lib/
+ubuntu@XXX.XXX.XXX.XXX:~$ ./gradlew capsuleExecutor
+ubuntu@XXX.XXX.XXX.XXX:~$ mkdir -p /usr/local/libexec/mesos/
+ubuntu@XXX.XXX.XXX.XXX:~$ sudo cp build/libs/myriad-executor-* /usr/local/libexec/mesos/
 ```
 
 Next, we configure YARN to use Myriad. Paste the following into `/usr/local/hadoop/etc/hadoop/yarn-site.xml` after the section `<!-- Site specific YARN configuration properties -->`:
@@ -86,7 +86,7 @@ Note that I've been doing the deployment on an [m3.2xlarge](http://aws.amazon.co
 To configure Myriad itself, paste the following into a new file called `/usr/local/hadoop/etc/hadoop/myriad-default-config.yml`:
 
 ```yml
-mesosMaster: 10.0.2.15:5050
+mesosMaster: XXX.XXX.XXX.XXX:5050
 checkpoint: false
 frameworkFailoverTimeout: 43200000
 frameworkName: MyriadAlpha
@@ -117,14 +117,14 @@ executor:
 Finally, to launch Myriad, run the following:
 
 ```shell
-ubuntu@ip-ZZ-ZZ-ZZ-ZZ:~$ su hduser
-hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ yarn resourcemanager start 
+ubuntu@XXX.XXX.XXX.XXX:~$ su hduser
+hduser@XXX.XXX.XXX.XXX:~$ yarn resourcemanager start 
 ```
 
 Check the Mesos cluster:
 
 ```shell
-hduser@ip-ZZ-ZZ-ZZ-ZZ:~$ mesos state
+hduser@XXX.XXX.XXX.XXX:~$ mesos state
 ```
 
 
